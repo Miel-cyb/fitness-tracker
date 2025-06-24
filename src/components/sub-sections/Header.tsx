@@ -37,7 +37,7 @@ const Header = () => {
           Get personalized meal plans and workout routines based on your
           country, body, and goals.
         </p>
-        <Button size="lg" onClick={() =>navigate("/sign-up")}>Get Started</Button>
+        <Button size="lg" className=" text-white font-semibold px-8 py-3 rounded-full hover:bg-gray-400 hover:cursor-pointer transition" onClick={() =>navigate("/sign-up")}>Get Started</Button>
       </div>
         
       <div className="flex items-center justify-center rounded-lg p-4 bg-gray-100/20 mt-12  md:p-7 text-white shadow-sm text-sm z-10 w-full max-w-xl">

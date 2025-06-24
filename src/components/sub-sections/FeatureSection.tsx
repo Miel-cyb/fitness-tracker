@@ -1,3 +1,4 @@
+import Card from "./card";
 import FeatureCard from "./FeautureCard";
 import { FaDumbbell, FaHeartbeat, FaAppleAlt, FaRunning, FaSmileBeam } from "react-icons/fa";
 
@@ -41,6 +42,10 @@ export default function FeaturesSection() {
           <FeatureCard key={i} {...feature} index={i} />
         ))}
       </div>
+    {features.map((f, i) => (
+    <Card title= {f.title} text={f.description} index={i}/>
+
+    ))}
       </div>
     </section>
   );
