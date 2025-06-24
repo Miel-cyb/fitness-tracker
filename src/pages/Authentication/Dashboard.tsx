@@ -26,13 +26,32 @@ import { useEffect, useState } from "react"
 import { getDoc,doc} from "firebase/firestore"
 import { onAuthStateChanged } from "firebase/auth"
 import { auth, db } from "@/lib/Firebase"
-import { useUser } from "@/components/sub-sections/UserContext"
+import countries from 'world-countries'
+import { Select, SelectTrigger, SelectContent,SelectValue, SelectItem } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import { Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog"
+
 
 
 
 export default function Dashboard() {
   const [username, setUsername] = useState("User");
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    country: "",
+    weight: "",
+    allergies: "",
+    goal: ""
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) =>{
+    setFormData({...formData, [e.target.name]: e.target.value })
+  }
+
+  
+const countryNames = countries.map((country) => country.name.common);
+
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -62,6 +81,29 @@ export default function Dashboard() {
       <AppSidebar />
       <SidebarInset>
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+
+        <Dialog>
+          <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tell us more about you</DialogTitle>
+          </DialogHeader>
+          <form action="#" className="space-y-4">
+          <Input name="weight" placeholder="Body weight (kg)" value={formData.weight} onChange={handleInputChange} />
+          <Input name="allergies" placeholder="Food allergies" value={formData.allergies} onChange={handleInputChange} />
+          <Select>
+            <SelectTrigger>
+              <SelectValue placeholder="Select Country"/>
+            </SelectTrigger>
+            <SelectContent>
+            {countryNames.map((country) => (
+                  <SelectItem key={country} value={country}>{country}</SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+          </form>
+          </DialogContent>
+        </Dialog>
+
           {/* Header */}
           <header className="top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-gray-100">
             <div className="flex h-16 items-center gap-4 px-6">
