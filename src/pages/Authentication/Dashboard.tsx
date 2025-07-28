@@ -23,7 +23,7 @@ import {
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
-import { getDoc,doc} from "firebase/firestore"
+import { getDoc, updateDoc, doc} from "firebase/firestore"
 import { onAuthStateChanged } from "firebase/auth"
 import { auth, db } from "@/lib/Firebase"
 import countries from 'world-countries'
@@ -35,7 +35,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui
 
 
 export default function Dashboard() {
-  const [username, setUsername] = useState("User");
+  const [username, setUsername] = useState(" ");
+  const [openDialog, setOpenDialog] = useState(false)
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     country: "",
@@ -43,6 +44,26 @@ export default function Dashboard() {
     allergies: "",
     goal: ""
   });
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    console.log(formData)
+    const user = auth.currentUser;
+    if (!user) return;
+  
+    try {
+      await updateDoc(doc(db, "users", user.uid), {
+        ...formData,
+        profileComplete: true,
+      });
+      setOpenDialog(false); 
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
+  };
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) =>{
     setFormData({...formData, [e.target.name]: e.target.value })
@@ -61,6 +82,14 @@ const countryNames = countries.map((country) => country.name.common);
           const userData = userDoc.data();
           if (userData) {
             setUsername(userData.username);
+            
+          
+            if (userData?.profileComplete) {
+              setOpenDialog(false);
+            } else {
+              setOpenDialog(true);
+            }
+            
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
@@ -81,29 +110,47 @@ const countryNames = countries.map((country) => country.name.common);
       <AppSidebar />
       <SidebarInset>
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
-
-        <Dialog>
+        
+        <Dialog open={openDialog} onOpenChange={() => {}}>
           <DialogContent>
           <DialogHeader>
             <DialogTitle>Tell us more about you</DialogTitle>
           </DialogHeader>
-          <form action="#" className="space-y-4">
-          <Input name="weight" placeholder="Body weight (kg)" value={formData.weight} onChange={handleInputChange} />
-          <Input name="allergies" placeholder="Food allergies" value={formData.allergies} onChange={handleInputChange} />
-          <Select>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Country"/>
-            </SelectTrigger>
-            <SelectContent>
-            {countryNames.map((country) => (
-                  <SelectItem key={country} value={country}>{country}</SelectItem>
-                ))}
-            </SelectContent>
+
+          <form action="submit" onSubmit={handleSubmit} className="space-y-4">
+          <Select onValueChange={(value) => setFormData({ ...formData, goal: value })}>
+          <SelectTrigger>
+            <SelectValue placeholder="What's your goal?" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Lose weight">Lose weight</SelectItem>
+            <SelectItem value="Strength training & muscle gain">Strength training & muscle gain</SelectItem>
+            <SelectItem value="Flexibility and mobility">Flexibility and mobility</SelectItem>
+          </SelectContent>
           </Select>
+
+          <Input name="weight" placeholder="Body weight (kg)" value={formData.weight} onChange={handleInputChange}  />
+          <Input name="allergies" placeholder="Food allergies" value={formData.allergies} onChange={handleInputChange} />
+
+          <Select onValueChange={(value) => setFormData({ ...formData, country: value })}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select Country" />
+          </SelectTrigger>
+          <SelectContent>
+            {countryNames.map((country) => (
+              <SelectItem key={country} value={country}>
+                {country}
+              </SelectItem>
+            ))}
+          </SelectContent>
+          </Select>
+          <Button type="submit" >
+            Submit
+          </Button>
           </form>
           </DialogContent>
         </Dialog>
-
+     
           {/* Header */}
           <header className="top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-gray-100">
             <div className="flex h-16 items-center gap-4 px-6">
